@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="944151e0-4516-442e-a6ba-43ae7e9d9eac" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.ini" beforeDir="false" afterPath="$PROJECT_DIR$/settings.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ui/list_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/ui/list_item.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ui/main_win.py" beforeDir="false" afterPath="$PROJECT_DIR$/ui/main_win.py" afterDir="false" />
     </list>
     <ignored path=".idea/" />
     <ignored path="tmp/" />
@@ -201,11 +198,6 @@
               <item name="net_watchdog" type="b2602c69:ProjectViewProjectNode" />
               <item name="net_watchdog" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="net_watchdog" type="b2602c69:ProjectViewProjectNode" />
-              <item name="net_watchdog" type="462c0819:PsiDirectoryNode" />
-              <item name="res" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -375,6 +367,14 @@
       <option name="presentableId" value="Default" />
       <updated>1605599018825</updated>
     </task>
+    <task id="LOCAL-00001" summary="some fixes">
+      <created>1638368515109</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1638368515109</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TodoView">
@@ -389,19 +389,19 @@
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4939759" visible="true" weight="0.1886196" />
-      <window_info id="Structure" order="1" sideWeight="0.5060241" side_tool="true" visible="true" weight="0.1886196" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49356222" visible="true" weight="0.22023182" />
+      <window_info id="Structure" order="1" sideWeight="0.5064378" side_tool="true" visible="true" weight="0.22023182" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32936078" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.2042186" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.2042186" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.34561214" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32885906" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32981783" />
+      <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49947312" visible="true" weight="0.32981783" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.1971831" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32936078" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50052685" side_tool="true" weight="0.32981783" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.27843988" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -476,6 +476,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="some fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="some fixes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
