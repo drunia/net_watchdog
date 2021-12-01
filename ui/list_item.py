@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import shutil
-import os
 import logging
 import requests
+import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon, QMovie

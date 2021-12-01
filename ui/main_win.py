@@ -161,7 +161,6 @@ class MainWin(QMainWindow):
                                         rect.width(), rect.height())
 
 
-
 class UpdateDevicesThread(QThread):
     """
     Used for network requests
