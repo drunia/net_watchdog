@@ -23,6 +23,7 @@ class Device:
         self.online_stat = None
         self.onvif_device = None
         self.onvif_snapshot_uri = None
+        self.trigger_count = 0
         self.logger = logging.getLogger("Device")
 
     def get_config(self):
@@ -59,18 +60,28 @@ class Device:
                 print(e)
         elif self.watch_method == WatchMethod.PORT:
             port_res = self._port_is_open()
-            if port_res is None:
+            if isinstance(port_res, (int, float)):
+                port_res += 1
+            if not bool(port_res):
                 self.online_stat = ""
             else:
                 port_res -= measurement_error
                 self.online_stat = round(port_res) if port_res > 1 else 1
         elif self.watch_method == WatchMethod.PING:
             ping_res = ping(self.ip, timeout=5, unit="ms")
-            if ping_res is None:
+            if isinstance(ping_res, (int, float)):
+                ping_res += 1
+            if not bool(ping_res):
                 self.online_stat = ""
             else:
                 ping_res -= measurement_error
                 self.online_stat = round(ping_res) if ping_res > 1 else 1
+        # Update trigger count 
+        if bool(self.online_stat):
+            self.trigger_count = 0
+        else:
+            self.trigger_count += 1
+        print("trigger_count:", self.trigger_count)
         return self.online_stat
 
     def get_onvif_snapshot(self):

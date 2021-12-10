@@ -70,6 +70,13 @@ class WatchManager:
         w.update_info(title, online_statistics)
         w.update_online_status(w.device.online_stat)
         self.logger.debug(f"{w.device} online_stat (ms): {w.device.online_stat}")
+        # Initialize ALARM by trigger count
+        triggers = self.settings.config[GENERAL_SECTION]['check_count_to_alarm']
+        if not isinstance(triggers, int):
+            self.settings.config[GENERAL_SECTION]['check_count_to_alarm'] = '1'
+            triggers = 1
+        if w.device.trigger_count >= int(triggers):
+            print("TRIGGER ALARM!!")
 
     @staticmethod
     def sort_by_active(watcher):
