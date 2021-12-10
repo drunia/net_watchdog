@@ -104,7 +104,7 @@ class Settings:
 if __name__ == "__main__":
     s = Settings()
     s.write_settings()
-    print("Sections:", len(s.sections))
+    print("Sections:", s.sections)
 
 
 

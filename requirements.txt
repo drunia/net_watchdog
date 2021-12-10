@@ -7,11 +7,9 @@ isodate==0.6.0
 lxml==4.6.4
 onvif-zeep==0.2.12
 ping3==3.0.2
-pkg_resources==0.0.0
 platformdirs==2.4.0
-PyQt5==5.15.6
-PyQt5-Qt5==5.15.2
-PyQt5-sip==12.9.0
+PyQt5==5.15.1
+PyQt5-sip==12.8.1
 pytz==2021.3
 requests==2.26.0
 requests-file==1.5.1

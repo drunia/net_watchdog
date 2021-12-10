@@ -11,8 +11,8 @@ from datetime import datetime
 
 
 class Device:
-    def __init__(self, method, watch_for, ip: str, user: str = "admin",
-                 password: str = "admin", port: int = 80, watched=True):
+    def __init__(self, method, watch_for, ip: str, user: str = "none",
+                 password: str = "none", port: int = 0, watched=True):
         self.watch_method = method if type(method) is WatchMethod else WatchMethod(int(method))
         self.watch_for = watch_for if type(watch_for) is WatchFor else WatchFor(int(watch_for))
         self.ip = ip
