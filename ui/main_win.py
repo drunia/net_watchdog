@@ -12,7 +12,7 @@ from ui.add_dev_dialog import AddDevDialog
 from ui.journal import Journal
 from ui.settings import SettingsDialog
 from playsound import playsound
-
+from os.path import abspath
 
 class MainWin(QMainWindow):
     WM: WatchManager
@@ -223,7 +223,9 @@ class PlayAudioThread(QThread):
 
     def run(self):
         self.logger.debug(f"play started")
-        playsound('./res/alarm.wav')
+        snd_path = abspath('./res/alarm.wav').replace('\\', '/')
+        print(snd_path)
+        playsound(snd_path)
         self.logger.debug(f"play finished")
         
 
