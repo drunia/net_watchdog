@@ -11,6 +11,7 @@ from device import Device
 from ui.add_dev_dialog import AddDevDialog
 from ui.journal import Journal
 from ui.settings import SettingsDialog
+from playsound import playsound
 
 
 class MainWin(QMainWindow):
@@ -19,10 +20,17 @@ class MainWin(QMainWindow):
     def __init__(self):
         super().__init__()
         self.logger = logging.getLogger("MainWin")
+
+            
         # Update Thread
         self.update_thread = UpdateDevicesThread(self)
         self.update_thread.updateSignal.connect(self._update_watcher)
         self.update_thread.finished.connect(self.build_watchers_list)
+
+        # PlaySound Thread
+        self.playsound_thread = PlayAudioThread()
+        self.notify_sound = False
+
 
         uic.loadUi('ui/main_win.ui', self)
 
@@ -52,9 +60,8 @@ class MainWin(QMainWindow):
 
         # Create update timer
         self.timer = QTimer(self)
-        self.timer.setInterval(5*1000)
         self.timer.timeout.connect(self.update_watcher_list)
-        self.timer.start()
+
 
         # Settings
         self.settings = Settings()
@@ -64,14 +71,22 @@ class MainWin(QMainWindow):
             self.load_config()
         else:
             self.vLayoutList.addWidget(self.emptyLabel)
-
+            
+            
     def read_general_settings(self):
         try:
             timeout = int(self.settings.read(UPDATE_TIMEOUT))
-        except NoOptionError:
+        except NoOptionError or ValueError:
             timeout = 5
             self.settings.write(UPDATE_TIMEOUT, timeout)
         self.timer.setInterval(timeout*1000)
+        self.timer.start()
+
+        try:
+            self.notify_sound = bool(int(self.settings.read('notify_sound')))
+        except NoOptionError or ValueError:
+            self.notify_sound = True
+            
         self.logger.info("General settings readed")
 
     def showEvent(self, evt: QShowEvent):
@@ -138,6 +153,20 @@ class MainWin(QMainWindow):
                 self.vLayoutList.addWidget(tmp_widget)
             elif index >= self.vLayoutList.count():
                 self.vLayoutList.addWidget(wf)
+        # Initialize ALARM by trigger count
+        triggers = self.settings.config[GENERAL_SECTION]['check_count_to_alarm']
+        if not isinstance(triggers, int):
+            self.settings.config[GENERAL_SECTION]['check_count_to_alarm'] = '1'
+            triggers = 1
+        alarm = False
+        for w in self.WM.watchers:
+            if w.device.trigger_count >= int(triggers):
+                self.logger.info(f"{w.device_title_lb.text()} - TRIGGER ALARM ({w.device.trigger_count})")
+                alarm = True
+        # Play alarm
+        if alarm and self.notify_sound:
+            self.playsound_thread.start()
+        
 
     def load_config(self):
         for watcher in self.settings.watchers:
@@ -182,6 +211,21 @@ class UpdateDevicesThread(QThread):
                 self.updateSignal.emit(w)
                 w.loading_lb.setVisible(False)
         self.logger.debug("finished")
+        
+
+class PlayAudioThread(QThread):
+    """
+    Used for play audio
+    """
+    def __init__(self):
+        super().__init__()
+        self.logger = logging.getLogger("PlayAudioThread") 
+
+    def run(self):
+        self.logger.debug(f"play started")
+        playsound('./res/alarm.wav')
+        self.logger.debug(f"play finished")
+        
 
 
 if __name__ == "__main__":

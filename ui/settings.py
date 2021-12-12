@@ -23,22 +23,22 @@ class SettingsDialog(QDialog):
     def load_settings(self):
         try:
             timeout_index = (int(self.settings.read(UPDATE_TIMEOUT)) / 5)-1
-        except NoOptionError:
+        except NoOptionError or ValueError:
             timeout_index = 0
         self.update_cb.setCurrentIndex(timeout_index)
         try:
             check_count_to_alarm_index = int(self.settings.read(CHECK_COUNT_TO_ALARM))-1
-        except NoOptionError:
+        except NoOptionError or ValueError:
             check_count_to_alarm_index = self.check_for_trigger_cb.count()-1
         self.check_for_trigger_cb.setCurrentIndex(check_count_to_alarm_index)
         try:
             sort_by_lag_time = int(self.settings.read(SORT_BY_LAG_TIME))
-        except NoOptionError:
+        except NoOptionError or ValueError:
             sort_by_lag_time = 2
         self.sort_ch.setCheckState(sort_by_lag_time)
         try:
             notify_sound = int(self.settings.read(NOTIFY_SOUND))
-        except NoOptionError:
+        except NoOptionError or ValueError:
             notify_sound = 2
         self.notify_sound_ch.setCheckState(notify_sound)
 

@@ -33,9 +33,10 @@ if __name__ == "__main__":
 
     # Clear tmp dir
     tmp_dir = os.path.join(os.curdir, "tmp")
-    for file in os.listdir(tmp_dir):
-        del_file = os.path.join(tmp_dir, file)
-        if os.access(del_file, os.W_OK):
-            logger.info(f"Delete temp file: {del_file}")
-            os.remove(del_file)
+    if os.path.exists(tmp_dir):
+        for file in os.listdir(tmp_dir):
+            del_file = os.path.join(tmp_dir, file)
+            if os.access(del_file, os.W_OK):
+                logger.info(f"Delete temp file: {del_file}")
+                os.remove(del_file)
     sys.exit(app_ret_code)

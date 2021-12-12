@@ -165,6 +165,7 @@ class WatchFrame(QFrame):
             self.device_status_lb.setStyleSheet("QLabel { color : rgb(120, 120, 120); }")
             self.cam_preview_lb.setToolTip(None)
         self.device.watched = enabled
+        self.device.trigger_count = 0
         self.enabled = enabled
         self.WM.update_info(self)
 
