@@ -21,12 +21,7 @@ class MainWin(QMainWindow):
     def __init__(self):
         super().__init__()
         self.logger = logging.getLogger("MainWin")
-            
-        # Update Thread
-        self.update_thread = UpdateDevicesThread(self)
-        self.update_thread.updateSignal.connect(self._update_watcher)
-        self.update_thread.finished.connect(self.build_watchers_list)
-
+        self.update_threads = []
         # PlaySound Thread
         self.playsound_thread = PlayAudioThread()
         self.notify_sound = False
@@ -60,7 +55,6 @@ class MainWin(QMainWindow):
         # Create update timer
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_watcher_list)
-
 
         # Settings
         self.settings = Settings()
@@ -109,7 +103,14 @@ class MainWin(QMainWindow):
         """
         Update watchers list in other thread
         """
-        self.update_thread.start()
+        print('watchers:', len(self.WM.watchers))
+        self.build_watchers_list()
+        self.update_threads.clear()
+        for w in self.WM.watchers:
+            update_thread = UpdateDevicesThread(w)
+            update_thread.updateSignal.connect(self._update_watcher)
+            update_thread.start()
+            self.update_threads.append(update_thread)
 
     def add_dev_btn_click(self):
         AddDevDialog(self.add_dev, parent=self).show()
@@ -193,22 +194,21 @@ class UpdateDevicesThread(QThread):
     """
     updateSignal = QtCore.pyqtSignal(object)
 
-    def __init__(self, main_w: MainWin):
+    def __init__(self, w: WatchFrame):
         super().__init__()
-        self.logger = logging.getLogger("UpdateDevicesThread")
-        self.main_w: MainWin = main_w
+        self.w = w
+        self.logger = logging.getLogger(f"UpdateDevicesThread [{self.w.device_title_lb.text()}]")
 
     def run(self):
-        self.logger.debug("started")
-        for w in self.main_w.WM.watchers:
-            if w.enabled:
-                w.loading_lb.setVisible(True)
-                online_stat = w.device.is_online()
-                self.logger.debug(f"{w.device} online_stat (ms): {online_stat}")
-                self.updateSignal.emit(w)
-                w.loading_lb.setVisible(False)
-        self.logger.debug("finished")
-        
+        self.logger.info("update started")
+        if self.w.enabled:
+            self.w.loading_lb.setVisible(True)
+            online_stat = self.w.device.is_online()
+            self.logger.info(f"{self.w.device} online_stat (ms): {online_stat}")
+            self.updateSignal.emit(self.w)
+            self.w.loading_lb.setVisible(False)
+        self.logger.info("update finished")
+
 
 class PlayAudioThread(QThread):
     """
