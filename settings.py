@@ -3,6 +3,7 @@
 
 import sys
 from configparser import *
+import logging
 
 GENERAL_SECTION = "General"
 SETTINGS_FILE = "./settings.ini"
@@ -28,6 +29,7 @@ class Settings:
         """
         :param file: Optional - settings file
         """
+        self.logger = logging.getLogger('Settings')
         self.file = file
         self.config = ConfigParser()
         self.sections = []
@@ -99,6 +101,7 @@ class Settings:
         """
         with open(self.file, "w") as f:
             self.config.write(f)
+        self.logger.info(f'Settings write to {self.file}')
 
 
 if __name__ == "__main__":

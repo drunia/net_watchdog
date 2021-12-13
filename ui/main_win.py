@@ -14,13 +14,13 @@ from ui.settings import SettingsDialog
 from playsound import playsound
 from os.path import abspath
 
+
 class MainWin(QMainWindow):
     WM: WatchManager
 
     def __init__(self):
         super().__init__()
         self.logger = logging.getLogger("MainWin")
-
             
         # Update Thread
         self.update_thread = UpdateDevicesThread(self)
@@ -30,7 +30,6 @@ class MainWin(QMainWindow):
         # PlaySound Thread
         self.playsound_thread = PlayAudioThread()
         self.notify_sound = False
-
 
         uic.loadUi('ui/main_win.ui', self)
 
@@ -71,8 +70,7 @@ class MainWin(QMainWindow):
             self.load_config()
         else:
             self.vLayoutList.addWidget(self.emptyLabel)
-            
-            
+
     def read_general_settings(self):
         try:
             timeout = int(self.settings.read(UPDATE_TIMEOUT))
@@ -154,19 +152,18 @@ class MainWin(QMainWindow):
             elif index >= self.vLayoutList.count():
                 self.vLayoutList.addWidget(wf)
         # Initialize ALARM by trigger count
-        triggers = self.settings.config[GENERAL_SECTION]['check_count_to_alarm']
+        triggers = int(self.settings.read('check_count_to_alarm'))
         if not isinstance(triggers, int):
-            self.settings.config[GENERAL_SECTION]['check_count_to_alarm'] = '1'
             triggers = 1
+            self.settings.write('check_count_to_alarm', str(triggers))
         alarm = False
         for w in self.WM.watchers:
-            if w.device.trigger_count >= int(triggers):
+            if w.device.trigger_count >= triggers:
                 self.logger.info(f"{w.device_title_lb.text()} - TRIGGER ALARM ({w.device.trigger_count})")
                 alarm = True
         # Play alarm
         if alarm and self.notify_sound:
             self.playsound_thread.start()
-        
 
     def load_config(self):
         for watcher in self.settings.watchers:
@@ -219,16 +216,17 @@ class PlayAudioThread(QThread):
     """
     def __init__(self):
         super().__init__()
-        self.logger = logging.getLogger("PlayAudioThread") 
+        self.logger = logging.getLogger("PlayAudioThread")
 
     def run(self):
-        self.logger.debug(f"play started")
         snd_path = abspath('./res/alarm.wav').replace('\\', '/')
-        print(snd_path)
-        playsound(snd_path)
-        self.logger.debug(f"play finished")
+        self.logger.debug(f"Play started {snd_path}")
+        try:
+            playsound(snd_path)
+        except Exception as e:
+            self.logger.error(e)
+        self.logger.debug(f"Play finished")
         
-
 
 if __name__ == "__main__":
     pass

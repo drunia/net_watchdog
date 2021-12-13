@@ -5,11 +5,13 @@ from PyQt5.Qt import QDialog, Qt, QComboBox
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QCloseEvent, QKeyEvent
 from settings import *
+from logging import getLogger
 
 
 class SettingsDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
+        self.logger = getLogger('SettingsDialog')
         loadUi("ui/settings.ui", self)
         self.setWindowTitle(f"{parent.windowTitle()} : Настройки")
         self.settings = Settings()
@@ -55,7 +57,7 @@ class SettingsDialog(QDialog):
     def closeEvent(self, evt: QCloseEvent):
         if evt.type() == QCloseEvent.Close:
             timeout = (self.update_cb.currentIndex()+1) * 5
-            print(f"current update timeout: {timeout} seconds")
+            self.logger.info(f"current update timeout: {timeout} seconds")
             self.settings.write(UPDATE_TIMEOUT, timeout)
             self.settings.write(CHECK_COUNT_TO_ALARM, self.check_for_trigger_cb.currentIndex()+1)
             self.settings.write(SORT_BY_LAG_TIME, self.sort_ch.checkState())

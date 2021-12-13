@@ -66,7 +66,7 @@ class Device:
                 self.online_stat = ""
             else:
                 port_res -= measurement_error
-                self.online_stat = round(port_res) if port_res > 1 else 1
+                self.online_stat = round(port_res) if port_res > 1 else 0
         elif self.watch_method == WatchMethod.PING:
             ping_res = ping(self.ip, timeout=5, unit="ms")
             if isinstance(ping_res, (int, float)):
@@ -75,7 +75,7 @@ class Device:
                 self.online_stat = ""
             else:
                 ping_res -= measurement_error
-                self.online_stat = round(ping_res) if ping_res > 1 else 1
+                self.online_stat = round(ping_res) if ping_res > 1 else 0
         # Update trigger count 
         if bool(self.online_stat):
             self.trigger_count = 0
