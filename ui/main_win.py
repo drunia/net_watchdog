@@ -104,11 +104,14 @@ class MainWin(QMainWindow):
         Update watchers list in other thread
         """
         print('watchers:', len(self.WM.watchers))
-        self.build_watchers_list()
         self.update_threads.clear()
         for w in self.WM.watchers:
-            update_thread = UpdateDevicesThread(w)
+            if w is self.WM.watchers[-1]:
+                update_thread = UpdateDevicesThread(w, True)
+            else:
+                update_thread = UpdateDevicesThread(w, False)
             update_thread.updateSignal.connect(self._update_watcher)
+            update_thread.lastThreadSignal.connect(self.build_watchers_list)
             update_thread.start()
             self.update_threads.append(update_thread)
 
@@ -193,10 +196,12 @@ class UpdateDevicesThread(QThread):
     Used for network requests
     """
     updateSignal = QtCore.pyqtSignal(object)
+    lastThreadSignal = QtCore.pyqtSignal()
 
-    def __init__(self, w: WatchFrame):
+    def __init__(self, w: WatchFrame, last_in_list: bool = False):
         super().__init__()
         self.w = w
+        self.last_in_list = last_in_list
         self.logger = logging.getLogger(f"UpdateDevicesThread [{self.w.device_title_lb.text()}]")
 
     def run(self):
@@ -207,6 +212,9 @@ class UpdateDevicesThread(QThread):
             self.logger.info(f"{self.w.device} online_stat (ms): {online_stat}")
             self.updateSignal.emit(self.w)
             self.w.loading_lb.setVisible(False)
+        if self.last_in_list:
+            self.logger.info('Send signal to rebuild list WatchFrames')
+            self.lastThreadSignal.emit()
         self.logger.info("update finished")
 
 
