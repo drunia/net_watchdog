@@ -8,7 +8,7 @@ from ping3 import ping
 from contextlib import closing
 from watch_manager import WatchMethod, WatchFor
 from datetime import datetime
-
+import threading
 
 class Device:
     def __init__(self, method, watch_for, ip: str, user: str = "none",
@@ -50,7 +50,7 @@ class Device:
         """
         # errors in time measurement in ms
         measurement_error = 2
-        self.online_stat = ""
+        self.online_stat = None
         if not self.watched:
             return ""
         if self.watch_method == WatchMethod.ONVIF:
@@ -68,7 +68,7 @@ class Device:
                 port_res -= measurement_error
                 self.online_stat = round(port_res) if port_res > 1 else 0
         elif self.watch_method == WatchMethod.PING:
-            ping_res = ping(self.ip, timeout=5, unit="ms")
+            ping_res = ping(self.ip, timeout=3, unit="ms")
             if isinstance(ping_res, (int, float)):
                 ping_res += 1
             if not bool(ping_res):
@@ -81,6 +81,7 @@ class Device:
             self.trigger_count = 0
         else:
             self.trigger_count += 1
+        print('self.online_stat=', self.online_stat, 'thread=', threading.current_thread().name)
         return self.online_stat
 
     def get_onvif_snapshot(self):

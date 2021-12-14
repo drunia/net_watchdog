@@ -13,6 +13,14 @@ from ui.journal import Journal
 from ui.settings import SettingsDialog
 from playsound import playsound
 from os.path import abspath
+import platform
+from threading import Lock
+
+if platform.system().lower() == 'windows':
+    import winsound
+
+# Get main thread lock
+lock = Lock()
 
 
 class MainWin(QMainWindow):
@@ -22,6 +30,7 @@ class MainWin(QMainWindow):
         super().__init__()
         self.logger = logging.getLogger("MainWin")
         self.update_threads = []
+
         # PlaySound Thread
         self.playsound_thread = PlayAudioThread()
         self.notify_sound = False
@@ -101,19 +110,18 @@ class MainWin(QMainWindow):
 
     def update_watcher_list(self):
         """
-        Update watchers list in other thread
+        Update watchers list in different threads
         """
-        print('watchers:', len(self.WM.watchers))
         self.update_threads.clear()
         for w in self.WM.watchers:
             if w is self.WM.watchers[-1]:
                 update_thread = UpdateDevicesThread(w, True)
             else:
                 update_thread = UpdateDevicesThread(w, False)
-            update_thread.updateSignal.connect(self._update_watcher)
-            update_thread.lastThreadSignal.connect(self.build_watchers_list)
-            update_thread.start()
             self.update_threads.append(update_thread)
+            update_thread.lastThreadSignal.connect(self.build_watchers_list)
+            update_thread.updateSignal.connect(self._update_watcher)
+            update_thread.start()
 
     def add_dev_btn_click(self):
         AddDevDialog(self.add_dev, parent=self).show()
@@ -146,7 +154,8 @@ class MainWin(QMainWindow):
         self.WM.update_info(w)
 
     def build_watchers_list(self):
-        self.WM.watchers.sort(key=self.WM.sort_by_active)
+        lock.acquire()
+        self.WM.watchers.sort(key=WatchManager.sort_by_active)
         for wf, index in zip(self.WM.watchers, range(0, len(self.WM.watchers))):
             if index < self.vLayoutList.count() and self.vLayoutList.itemAt(index).widget() is not wf:
                 tmp_widget = self.vLayoutList.itemAt(index).widget()
@@ -155,6 +164,7 @@ class MainWin(QMainWindow):
                 self.vLayoutList.addWidget(tmp_widget)
             elif index >= self.vLayoutList.count():
                 self.vLayoutList.addWidget(wf)
+        lock.release()
         # Initialize ALARM by trigger count
         triggers = int(self.settings.read('check_count_to_alarm'))
         if not isinstance(triggers, int):
@@ -174,8 +184,8 @@ class MainWin(QMainWindow):
             watcher_conf = self.settings.read_watcher_conf(watcher)
             wf = WatchFrame(Device(*watcher_conf), self.WM)
             self.WM.watchers.append(wf)
-        self.update_watcher_list()
         self.read_general_settings()
+        # self.update_watcher_list()
 
     # Save settings on close main window
     def closeEvent(self, evt):
@@ -205,17 +215,19 @@ class UpdateDevicesThread(QThread):
         self.logger = logging.getLogger(f"UpdateDevicesThread [{self.w.device_title_lb.text()}]")
 
     def run(self):
-        self.logger.info("update started")
+        self.logger.debug("update started")
         if self.w.enabled:
             self.w.loading_lb.setVisible(True)
             online_stat = self.w.device.is_online()
             self.logger.info(f"{self.w.device} online_stat (ms): {online_stat}")
             self.updateSignal.emit(self.w)
             self.w.loading_lb.setVisible(False)
+        else:
+            self.w.device.trigger_count = 0
         if self.last_in_list:
             self.logger.info('Send signal to rebuild list WatchFrames')
             self.lastThreadSignal.emit()
-        self.logger.info("update finished")
+        self.logger.debug("update finished")
 
 
 class PlayAudioThread(QThread):
@@ -227,10 +239,13 @@ class PlayAudioThread(QThread):
         self.logger = logging.getLogger("PlayAudioThread")
 
     def run(self):
-        snd_path = abspath('./res/alarm.wav').replace('\\', '/')
+        snd_path = abspath('./res/alarm.wav')
         self.logger.debug(f"Play started {snd_path}")
         try:
-            playsound(snd_path)
+            if platform.system().lower() == 'windows':
+                winsound.PlaySound(snd_path, winsound.SND_FILENAME)
+            else:
+                playsound(snd_path)
         except Exception as e:
             self.logger.error(e)
         self.logger.debug(f"Play finished")

@@ -4,6 +4,7 @@
 import logging
 from enum import Enum
 from settings import *
+from threading import Lock
 
 
 class WatchMethod(Enum):
@@ -70,7 +71,6 @@ class WatchManager:
         w.update_info(title, online_statistics)
         w.update_online_status(w.device.online_stat)
         self.logger.debug(f"{w.device} online_stat (ms): {w.device.online_stat}")
-        
 
     @staticmethod
     def sort_by_active(watcher):
@@ -78,12 +78,18 @@ class WatchManager:
         Key function
         Sorting by online or enabled
         """
+        print('watcher.device.watch_method=', watcher.device.watch_method, 'watcher.device.online_stat=', watcher.device.online_stat, 'watcher.device.watched=', watcher.device.watched)
         # Online watchers, sorted by accessibility time, ONVIF top
         if bool(watcher.device.online_stat and watcher.device.watched):
-            return watcher.device.online_stat+1 if str(watcher.device.online_stat).isnumeric() else 1
+            if watcher.device.watch_method == WatchMethod.ONVIF:
+                print('ONVIF')
+                return -1
+            else:
+                return int(watcher.device.online_stat) if str(watcher.device.online_stat).isnumeric() else 1
         # Offline watchers
         if bool(watcher.device.watched):
-            return 100000
+            return 100000 if watcher.device.trigger_count < int(Settings().read(CHECK_COUNT_TO_ALARM)) else -1
+            # return 100000
         # Disabled watchers
         return 200000
 

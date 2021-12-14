@@ -157,7 +157,7 @@ class WatchFrame(QFrame):
             self.setStyleSheet(self.base_stylesheet)
             if not self.enabled and switch_enable:
                 self.device.watched = True
-                self.device.is_online()
+                # self.device.is_online()
         else:
             self.on_off_btn.setIcon(QIcon(self.btn_off_pixmap))
             self.device_status_lb.setText("Наблюдатель выключен")

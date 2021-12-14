@@ -25,7 +25,6 @@ class SettingsDialog(QDialog):
     def load_settings(self):
         try:
             timeout_index = int(int(self.settings.read(UPDATE_TIMEOUT)) / 5)-1
-            print(timeout_index)
         except NoOptionError or ValueError:
             timeout_index = 0
         self.update_cb.setCurrentIndex(timeout_index)
