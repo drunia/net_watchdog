@@ -3,6 +3,8 @@
 
 import socket
 import logging
+import time
+
 from onvif import ONVIFCamera, ONVIFError
 from ping3 import ping
 from contextlib import closing
@@ -81,6 +83,7 @@ class Device:
             self.trigger_count = 0
         else:
             self.trigger_count += 1
+        print('time=', time.time(), 'self.online_stat=', self.online_stat, 'thread=', threading.current_thread().name)
         return self.online_stat
 
     def get_onvif_snapshot(self):
