@@ -76,6 +76,7 @@ class MainWin(QMainWindow):
         except NoOptionError or ValueError:
             timeout = 5
             self.settings.write(UPDATE_TIMEOUT, timeout)
+        self.timer.stop()
         self.timer.setInterval(timeout*1000)
         self.timer.start()
 
@@ -89,14 +90,14 @@ class MainWin(QMainWindow):
     def showEvent(self, evt: QShowEvent):
         """Set geometry on showEvent"""
         try:
-            # x = self.settings.read(MAIN_WINDOW_X)
-            # y = self.settings.read(MAIN_WINDOW_Y)
+            x = self.settings.read(MAIN_WINDOW_X)
+            y = self.settings.read(MAIN_WINDOW_Y)
             w = self.settings.read(MAIN_WINDOW_WIDTH)
             h = self.settings.read(MAIN_WINDOW_HEIGHT)
-            # self.setGeometry(int(x), int(y), int(w), int(h))
+            self.setGeometry(int(x), int(y), int(w), int(h))
             self.resize(int(w), int(h))
-        except NoOptionError:
-            pass
+        except Exception as e:
+            self.logger.error(e)
 
     def open_journal(self):
         Journal(self)
@@ -114,19 +115,21 @@ class MainWin(QMainWindow):
             print('Threads still working, wait ...')
             return
             print('Threads still working')
-        for w in list(filter(lambda w: w.enabled, self.WM.watchers)):
-            update_thread = UpdateDevicesThread(w)
-            update_thread.setObjectName('QThread-' + str(w.device))
-            update_thread.finished.connect(self.update_thread_finished)
-            self.update_threads_pool.append(update_thread)
-            update_thread.start()
+        for w in self.WM.watchers:
+            if w.enabled:
+                update_thread = UpdateDevicesThread(w)
+                update_thread.finished.connect(self.update_thread_finished)
+                self.update_threads_pool.append(update_thread)
+                update_thread.start()
+            else:
+                w.device.trigger_count = 0
 
-    # Invoke when thread is finished
+    # Invoked when thread is finished
     def update_thread_finished(self):
         for thread in self.update_threads_pool:
             if thread.isFinished():
                 self.update_threads_pool.remove(thread)
-                self.logger.info(f'Thread {thread.objectName()} removed')
+                self.logger.info(f'Thread {thread.objectName()} finished and removed')
 
     def add_dev_btn_click(self):
         AddDevDialog(self.add_dev, parent=self).show()
@@ -144,8 +147,8 @@ class MainWin(QMainWindow):
     def save_config(self):
         for w in self.WM.watchers:
             self.settings.write_watcher(w)
-        self.settings.write(MAIN_WINDOW_X, str(self.pos().x()))
-        self.settings.write(MAIN_WINDOW_Y, str(self.pos().y()))
+        self.settings.write(MAIN_WINDOW_X, str(self.pos().x() if self.pos().x() >= 0 else 0))
+        self.settings.write(MAIN_WINDOW_Y, str(self.pos().y() if self.pos().y() >= 30 else 30))
         self.settings.write(MAIN_WINDOW_HEIGHT, str(self.height()))
         self.settings.write(MAIN_WINDOW_WIDTH, str(self.width()))
         self.settings.write_settings()
@@ -161,9 +164,7 @@ class MainWin(QMainWindow):
     def build_watchers_list(self):
         self.WM.watchers.sort(key=WatchManager.sort_by_active)
         for wf, index in zip(self.WM.watchers, range(0, len(self.WM.watchers))):
-            ######
             self._update_watcher(wf)
-            ######
             if index < self.vLayoutList.count() and self.vLayoutList.itemAt(index).widget() is not wf:
                 tmp_widget = self.vLayoutList.itemAt(index).widget()
                 self.vLayoutList.removeWidget(tmp_widget)
@@ -191,13 +192,11 @@ class MainWin(QMainWindow):
             wf = WatchFrame(Device(*watcher_conf), self.WM)
             self.WM.watchers.append(wf)
         self.read_general_settings()
-        # self.update_watcher_list()
 
     # Save settings on close main window
     def closeEvent(self, evt):
         self.save_config()
         evt.accept()
-        print("Settings saved.")
 
     def resizeEvent(self, evt: QResizeEvent):
         size = QSize(self.scrollArea.width(), self.size().height()-20)
@@ -215,15 +214,18 @@ class UpdateDevicesThread(QThread):
     def __init__(self, w: WatchFrame):
         super().__init__()
         self.w = w
-        self.logger = logging.getLogger(f"UpdateDevicesThread [{self.w.device_title_lb.text()}]")
+        self.setObjectName('QThread-' + str(w.device))
+        self.logger = logging.getLogger(self.objectName())
 
     def run(self):
         self.logger.debug("update started")
         if self.w.enabled:
             self.w.loading_lb.setVisible(True)
             online_stat = self.w.device.is_online()
-            self.logger.info(f"{self.w.device} online_stat (ms): {online_stat}")
+            self.logger.info(f"online_stat (ms): {online_stat}")
             self.w.loading_lb.setVisible(False)
+        else:
+            self.w.device.trigger_count = 0
         self.logger.debug("update finished")
 
 

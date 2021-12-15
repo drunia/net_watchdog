@@ -13,7 +13,7 @@ class Journal(QDialog):
         # Add hide/restore window option
         self.setModal(True)
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowMaximizeButtonHint)
-        self.resize(parent.width()*1.3, parent.height()*1.5)
+        self.resize(int(parent.width()*1.3), int(parent.height()*0.8))
         self.setWindowTitle(f"{parent.windowTitle()} : Журнал событий")
         self.show()
 

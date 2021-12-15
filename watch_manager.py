@@ -81,7 +81,6 @@ class WatchManager:
         # Online watchers, sorted by accessibility time, ONVIF top
         if bool(watcher.device.online_stat and watcher.device.watched):
             if watcher.device.watch_method == WatchMethod.ONVIF:
-                print('ONVIF')
                 return -1
             else:
                 return int(watcher.device.online_stat) if str(watcher.device.online_stat).isnumeric() else 10000
