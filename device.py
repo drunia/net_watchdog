@@ -81,7 +81,6 @@ class Device:
             self.trigger_count = 0
         else:
             self.trigger_count += 1
-        print('self.online_stat=', self.online_stat, 'thread=', threading.current_thread().name)
         return self.online_stat
 
     def get_onvif_snapshot(self):

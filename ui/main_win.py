@@ -14,13 +14,9 @@ from ui.settings import SettingsDialog
 from playsound import playsound
 from os.path import abspath
 import platform
-from threading import Lock
 
 if platform.system().lower() == 'windows':
     import winsound
-
-# Get main thread lock
-lock = Lock()
 
 
 class MainWin(QMainWindow):
@@ -29,7 +25,7 @@ class MainWin(QMainWindow):
     def __init__(self):
         super().__init__()
         self.logger = logging.getLogger("MainWin")
-        self.update_threads = []
+        self.update_threads_pool = []
 
         # PlaySound Thread
         self.playsound_thread = PlayAudioThread()
@@ -112,16 +108,25 @@ class MainWin(QMainWindow):
         """
         Update watchers list in different threads
         """
-        self.update_threads.clear()
-        for w in self.WM.watchers:
-            if w is self.WM.watchers[-1]:
-                update_thread = UpdateDevicesThread(w, True)
-            else:
-                update_thread = UpdateDevicesThread(w, False)
-            self.update_threads.append(update_thread)
-            update_thread.lastThreadSignal.connect(self.build_watchers_list)
-            update_thread.updateSignal.connect(self._update_watcher)
+        if len(self.update_threads_pool) == 0:
+            self.build_watchers_list()
+        else:
+            print('Threads still working, wait ...')
+            return
+            print('Threads still working')
+        for w in list(filter(lambda w: w.enabled, self.WM.watchers)):
+            update_thread = UpdateDevicesThread(w)
+            update_thread.setObjectName('QThread-' + str(w.device))
+            update_thread.finished.connect(self.update_thread_finished)
+            self.update_threads_pool.append(update_thread)
             update_thread.start()
+
+    # Invoke when thread is finished
+    def update_thread_finished(self):
+        for thread in self.update_threads_pool:
+            if thread.isFinished():
+                self.update_threads_pool.remove(thread)
+                self.logger.info(f'Thread {thread.objectName()} removed')
 
     def add_dev_btn_click(self):
         AddDevDialog(self.add_dev, parent=self).show()
@@ -154,9 +159,11 @@ class MainWin(QMainWindow):
         self.WM.update_info(w)
 
     def build_watchers_list(self):
-        lock.acquire()
         self.WM.watchers.sort(key=WatchManager.sort_by_active)
         for wf, index in zip(self.WM.watchers, range(0, len(self.WM.watchers))):
+            ######
+            self._update_watcher(wf)
+            ######
             if index < self.vLayoutList.count() and self.vLayoutList.itemAt(index).widget() is not wf:
                 tmp_widget = self.vLayoutList.itemAt(index).widget()
                 self.vLayoutList.removeWidget(tmp_widget)
@@ -164,7 +171,6 @@ class MainWin(QMainWindow):
                 self.vLayoutList.addWidget(tmp_widget)
             elif index >= self.vLayoutList.count():
                 self.vLayoutList.addWidget(wf)
-        lock.release()
         # Initialize ALARM by trigger count
         triggers = int(self.settings.read('check_count_to_alarm'))
         if not isinstance(triggers, int):
@@ -205,13 +211,10 @@ class UpdateDevicesThread(QThread):
     """
     Used for network requests
     """
-    updateSignal = QtCore.pyqtSignal(object)
-    lastThreadSignal = QtCore.pyqtSignal()
 
-    def __init__(self, w: WatchFrame, last_in_list: bool = False):
+    def __init__(self, w: WatchFrame):
         super().__init__()
         self.w = w
-        self.last_in_list = last_in_list
         self.logger = logging.getLogger(f"UpdateDevicesThread [{self.w.device_title_lb.text()}]")
 
     def run(self):
@@ -220,13 +223,7 @@ class UpdateDevicesThread(QThread):
             self.w.loading_lb.setVisible(True)
             online_stat = self.w.device.is_online()
             self.logger.info(f"{self.w.device} online_stat (ms): {online_stat}")
-            self.updateSignal.emit(self.w)
             self.w.loading_lb.setVisible(False)
-        else:
-            self.w.device.trigger_count = 0
-        if self.last_in_list:
-            self.logger.info('Send signal to rebuild list WatchFrames')
-            self.lastThreadSignal.emit()
         self.logger.debug("update finished")
 
 

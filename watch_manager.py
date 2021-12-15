@@ -78,14 +78,13 @@ class WatchManager:
         Key function
         Sorting by online or enabled
         """
-        print('watcher.device.watch_method=', watcher.device.watch_method, 'watcher.device.online_stat=', watcher.device.online_stat, 'watcher.device.watched=', watcher.device.watched)
         # Online watchers, sorted by accessibility time, ONVIF top
         if bool(watcher.device.online_stat and watcher.device.watched):
             if watcher.device.watch_method == WatchMethod.ONVIF:
                 print('ONVIF')
                 return -1
             else:
-                return int(watcher.device.online_stat) if str(watcher.device.online_stat).isnumeric() else 1
+                return int(watcher.device.online_stat) if str(watcher.device.online_stat).isnumeric() else 10000
         # Offline watchers
         if bool(watcher.device.watched):
             return 100000 if watcher.device.trigger_count < int(Settings().read(CHECK_COUNT_TO_ALARM)) else -1
