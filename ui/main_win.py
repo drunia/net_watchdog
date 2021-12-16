@@ -3,7 +3,7 @@
 
 from PyQt5.QtCore import QThread, Qt, QTimer, QRect, QSize
 from PyQt5.QtWidgets import QMainWindow, QLabel
-from PyQt5 import uic, QtCore
+from PyQt5 import uic
 from PyQt5.QtGui import QFont, QIcon, QResizeEvent, QShowEvent
 from watch_manager import *
 from ui.list_item import WatchFrame
@@ -24,6 +24,11 @@ class MainWin(QMainWindow):
 
     def __init__(self):
         super().__init__()
+
+        # Settings
+        self.settings = Settings()
+        self.WM = WatchManager(self)
+
         self.logger = logging.getLogger("MainWin")
         self.update_threads_pool = []
 
@@ -59,16 +64,17 @@ class MainWin(QMainWindow):
 
         # Create update timer
         self.timer = QTimer(self)
+        # Set default interval
+        self.timer.setInterval(5*1000)
         self.timer.timeout.connect(self.update_watcher_list)
-
-        # Settings
-        self.settings = Settings()
-        self.WM = WatchManager(self)
+        self.timer.start()
 
         if len(self.settings.watchers) > 0:
             self.load_config()
         else:
             self.vLayoutList.addWidget(self.emptyLabel)
+
+        self.update_watcher_list()
 
     def read_general_settings(self):
         try:
@@ -110,11 +116,11 @@ class MainWin(QMainWindow):
         Update watchers list in different threads
         """
         if len(self.update_threads_pool) == 0:
-            self.build_watchers_list()
+            # self.build_watchers_list()
+            pass
         else:
-            print('Threads still working, wait ...')
+            self.logger.info('Threads still working, wait ...')
             return
-            print('Threads still working')
         for w in self.WM.watchers:
             if w.enabled:
                 update_thread = UpdateDevicesThread(w)
@@ -130,12 +136,14 @@ class MainWin(QMainWindow):
             if thread.isFinished():
                 self.update_threads_pool.remove(thread)
                 self.logger.info(f'Thread {thread.objectName()} finished and removed')
+        if len(self.update_threads_pool) == 0:
+            self.build_watchers_list()
 
     def add_dev_btn_click(self):
         AddDevDialog(self.add_dev, parent=self).show()
 
     def add_dev(self, dev):
-        print(f"Add watcher: {dev}")
+        self.logger.info(f"Add watcher: {dev}")
         # Remove emptyLabel from watchers list
         if self.vLayoutList.count() == 1 and type(self.vLayoutList.itemAt(0).widget()) is QLabel:
             self.vLayoutList.removeWidget(self.vLayoutList.itemAt(0).widget())
@@ -162,7 +170,8 @@ class MainWin(QMainWindow):
         self.WM.update_info(w)
 
     def build_watchers_list(self):
-        self.WM.watchers.sort(key=WatchManager.sort_by_active)
+        if self.settings.read(SORT_BY_LAG_TIME) != '0':
+            self.WM.watchers.sort(key=WatchManager.sort_by_active)
         for wf, index in zip(self.WM.watchers, range(0, len(self.WM.watchers))):
             self._update_watcher(wf)
             if index < self.vLayoutList.count() and self.vLayoutList.itemAt(index).widget() is not wf:

@@ -4,10 +4,11 @@
 import shutil
 import logging
 import requests
+import settings
 import os
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QIcon, QMovie
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QPixmap, QIcon, QMovie, QFont
 from PyQt5.QtWidgets import QFrame, QMessageBox
 from requests.auth import HTTPBasicAuth
 
@@ -22,6 +23,7 @@ class WatchFrame(QFrame):
         self.device = device
         self.WM = w_manager
         self.logger = logging.getLogger("WatchFrame")
+        self.blinked = True
         # UI
         self.base_stylesheet = """
             QFrame {
@@ -70,9 +72,26 @@ class WatchFrame(QFrame):
         # Delete watcher button click handler
         self.del_btn.clicked.connect(self.close_watcher)
 
+        # Trigger timer
+        self.blinkTimer = QTimer(self)
+        self.blinkTimer.setInterval(1000)
+        self.blinkTimer.timeout.connect(self.timerEvent)
+
         # Enable watcher
         self.enable(self.device.watched)
         self.WM.update_info(self)
+
+    def timerEvent(self):
+        font: QFont = self.device_status_lb.font()
+        if self.device.trigger_count >= int(settings.Settings().read(settings.CHECK_COUNT_TO_ALARM)):
+            self.blinked = not self.blinked
+            font.setBold(self.blinked)
+        else:
+            font.setBold(False)
+        if not self.enabled:
+            self.blinkTimer.stop()
+            font.setBold(False)
+        self.device_status_lb.setFont(font)
 
     # Close/delete this watcher
     def close_watcher(self):
@@ -83,7 +102,7 @@ class WatchFrame(QFrame):
             return
         self.WM.del_watch(self)
         self.close()
-        print("Watcher", self.device, "removed.")
+        self.logger.info(f"Watcher {self.device} removed.")
 
     def update_cam_preview(self, url, auth_data):
         """"
@@ -99,7 +118,7 @@ class WatchFrame(QFrame):
         try:
             res = requests.get(url, auth=HTTPBasicAuth(*auth_data), stream=True)
         except Exception as e:
-            print(e)
+            self.logger.error(e)
         pic_size = 0
         if res is not None and res.status_code == 200:
             with open(pic, "wb") as f:
@@ -157,13 +176,15 @@ class WatchFrame(QFrame):
             self.setStyleSheet(self.base_stylesheet)
             if not self.enabled and switch_enable:
                 self.device.watched = True
-                # self.device.is_online()
+            self.blinkTimer.start()
         else:
             self.on_off_btn.setIcon(QIcon(self.btn_off_pixmap))
             self.device_status_lb.setText("Наблюдатель выключен")
             self.setStyleSheet(self.base_stylesheet + self.disable_stylesheet)
             self.device_status_lb.setStyleSheet("QLabel { color : rgb(120, 120, 120); }")
             self.cam_preview_lb.setToolTip(None)
+            self.device.online_stat = 0
+
         self.device.watched = enabled
         self.device.trigger_count = 0
         self.enabled = enabled

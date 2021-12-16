@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import logging
+
 from enum import Enum
 from settings import *
-from threading import Lock
 
 
 class WatchMethod(Enum):
@@ -86,8 +85,7 @@ class WatchManager:
                 return int(watcher.device.online_stat) if str(watcher.device.online_stat).isnumeric() else 10000
         # Offline watchers
         if bool(watcher.device.watched):
-            return 100000 if watcher.device.trigger_count < int(Settings().read(CHECK_COUNT_TO_ALARM)) else -1
-            # return 100000
+            return 100000 if watcher.device.trigger_count < int(Settings().read(CHECK_COUNT_TO_ALARM)) else -2
         # Disabled watchers
         return 200000
 
