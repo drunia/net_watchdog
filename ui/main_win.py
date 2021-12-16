@@ -3,7 +3,7 @@
 
 from PyQt5.QtCore import QThread, Qt, QTimer, QRect, QSize
 from PyQt5.QtWidgets import QMainWindow, QLabel
-from PyQt5 import uic, QtCore
+from PyQt5 import uic
 from PyQt5.QtGui import QFont, QIcon, QResizeEvent, QShowEvent
 from watch_manager import *
 from ui.list_item import WatchFrame
@@ -24,6 +24,11 @@ class MainWin(QMainWindow):
 
     def __init__(self):
         super().__init__()
+
+        # Settings
+        self.settings = Settings()
+        self.WM = WatchManager(self)
+
         self.logger = logging.getLogger("MainWin")
         self.update_threads_pool = []
 
@@ -61,14 +66,12 @@ class MainWin(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_watcher_list)
 
-        # Settings
-        self.settings = Settings()
-        self.WM = WatchManager(self)
-
         if len(self.settings.watchers) > 0:
             self.load_config()
         else:
             self.vLayoutList.addWidget(self.emptyLabel)
+
+        self.update_watcher_list()
 
     def read_general_settings(self):
         try:
@@ -162,7 +165,8 @@ class MainWin(QMainWindow):
         self.WM.update_info(w)
 
     def build_watchers_list(self):
-        self.WM.watchers.sort(key=WatchManager.sort_by_active)
+        if self.settings.read(SORT_BY_LAG_TIME) != '0':
+            self.WM.watchers.sort(key=WatchManager.sort_by_active)
         for wf, index in zip(self.WM.watchers, range(0, len(self.WM.watchers))):
             self._update_watcher(wf)
             if index < self.vLayoutList.count() and self.vLayoutList.itemAt(index).widget() is not wf:

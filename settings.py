@@ -4,6 +4,7 @@
 import sys
 from configparser import *
 import logging
+from os.path import exists
 
 GENERAL_SECTION = "General"
 SETTINGS_FILE = "./settings.ini"
@@ -35,6 +36,8 @@ class Settings:
         self.sections = []
         self.watchers = []
 
+        if not exists(SETTINGS_FILE):
+            self.write_default_settings()
         self.read_settings()
 
     # Singleton
@@ -63,6 +66,8 @@ class Settings:
         :param key: String key
         :param value: String value
         """
+        if not self.config.has_section(GENERAL_SECTION):
+            self.config.add_section(GENERAL_SECTION)
         self.config[GENERAL_SECTION][key] = str(value)
         self.sections = self.config.sections()
 
@@ -102,6 +107,15 @@ class Settings:
         with open(self.file, "w") as f:
             self.config.write(f)
         self.logger.info(f'Settings write to {self.file}')
+
+    def write_default_settings(self):
+        """ Init default settings"""
+        self.logger.info('Write default settings...')
+        self.write(UPDATE_TIMEOUT, '5')
+        self.write(CHECK_COUNT_TO_ALARM, '2')
+        self.write(SORT_BY_LAG_TIME, '2')
+        self.write(NOTIFY_SOUND, '2')
+        self.write_settings()
 
 
 if __name__ == "__main__":
