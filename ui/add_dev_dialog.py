@@ -43,7 +43,6 @@ class AddDevDialog(QDialog):
         self.ipEdit.setText(ip)
 
     def cb_index_changed(self, index: int):
-        # print("ComboBox index:", index)
         if index > 0:
             self.stackedWidget.resize(self.stackedWidget.maximumSize())
             if index == 1:

@@ -3,14 +3,13 @@
 
 import socket
 import logging
-import time
 
 from onvif import ONVIFCamera, ONVIFError
 from ping3 import ping
 from contextlib import closing
 from watch_manager import WatchMethod, WatchFor
 from datetime import datetime
-import threading
+
 
 class Device:
     def __init__(self, method, watch_for, ip: str, user: str = "none",
@@ -65,24 +64,30 @@ class Device:
             if isinstance(port_res, (int, float)):
                 port_res += 1
             if not bool(port_res):
-                self.online_stat = ""
+                self.online_stat = None
             else:
                 port_res -= measurement_error
-                self.online_stat = round(port_res) if port_res > 1 else 0
+                self.online_stat = round(port_res) if port_res > 1 else 1
         elif self.watch_method == WatchMethod.PING:
             ping_res = ping(self.ip, timeout=3, unit="ms")
-            if isinstance(ping_res, (int, float)):
+            if (type(ping_res) == int) or (type(ping_res) == float):
                 ping_res += 1
             if not bool(ping_res):
-                self.online_stat = ""
+                self.online_stat = None
             else:
                 ping_res -= measurement_error
-                self.online_stat = round(ping_res) if ping_res > 1 else 0
-        # Update trigger count 
-        if bool(self.online_stat):
-            self.trigger_count = 0
+                self.online_stat = round(ping_res) if ping_res > 1 else 1
+        # Update trigger count
+        if self.watch_for == WatchFor.ONLINE:
+            if bool(self.online_stat):
+                self.trigger_count = 0
+            else:
+                self.trigger_count += 1
         else:
-            self.trigger_count += 1
+            if bool(self.online_stat):
+                self.trigger_count += 1
+            else:
+                self.trigger_count = 0
         return self.online_stat
 
     def get_onvif_snapshot(self):

@@ -59,7 +59,7 @@ class Settings:
                 filter(lambda item: str(item).startswith("WatchMethod."), self.config.sections())
             )
         except FileNotFoundError:
-            print("File:", SETTINGS_FILE, "not found, write settings first!", file=sys.stderr)
+            self.logger.error("File:", SETTINGS_FILE, "not found, write settings first!", file=sys.stderr)
 
     def write(self, key, value):
         """
