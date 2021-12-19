@@ -83,7 +83,7 @@ class WatchFrame(QFrame):
 
     def timerEvent(self):
         font: QFont = self.device_status_lb.font()
-        if self.device.trigger_count >= int(settings.Settings().read(settings.CHECK_COUNT_TO_ALARM)):
+        if self.device.trigger_count >= int(self.WM.settings.read(settings.CHECK_COUNT_TO_ALARM)):
             self.blinked = not self.blinked
             font.setBold(self.blinked)
         else:
@@ -105,7 +105,7 @@ class WatchFrame(QFrame):
         self.logger.info(f"Watcher {self.device} removed.")
 
     def update_cam_preview(self, url, auth_data):
-        """"
+        """
             :param url - HTTP URL
             :param auth_data - list [user, password]
             :return QPixmap

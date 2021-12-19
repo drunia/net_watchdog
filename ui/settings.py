@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from configparser import NoOptionError
 
 from PyQt5.Qt import QDialog, Qt, QComboBox
 from PyQt5.uic import loadUi

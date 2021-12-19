@@ -30,15 +30,18 @@ class Settings:
         """
         :param file: Optional - settings file
         """
+        if hasattr(self, 'file'):
+            # Settings already initialized
+            return
         self.logger = logging.getLogger('Settings')
         self.file = file
         self.config = ConfigParser()
         self.sections = []
         self.watchers = []
-
         if not exists(SETTINGS_FILE):
             self.write_default_settings()
         self.read_settings()
+        self.logger.info('Init new settings')
 
     # Singleton
     def __new__(cls, *args):
@@ -53,7 +56,7 @@ class Settings:
         """
         try:
             with open(self.file, "r") as f:
-                    self.config.read_file(f)
+                self.config.read_file(f)
             self.sections = self.config.sections()
             self.watchers = list(
                 filter(lambda item: str(item).startswith("WatchMethod."), self.config.sections())

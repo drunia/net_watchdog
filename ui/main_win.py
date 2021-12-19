@@ -5,6 +5,8 @@ from PyQt5.QtCore import QThread, Qt, QTimer, QRect, QSize
 from PyQt5.QtWidgets import QMainWindow, QLabel
 from PyQt5 import uic
 from PyQt5.QtGui import QFont, QIcon, QResizeEvent, QShowEvent
+
+from settings import *
 from watch_manager import *
 from ui.list_item import WatchFrame
 from device import Device
@@ -69,12 +71,14 @@ class MainWin(QMainWindow):
         self.timer.timeout.connect(self.update_watcher_list)
         self.timer.start()
 
-        if len(self.settings.watchers) > 0:
-            self.load_config()
-        else:
+        if len(self.settings.watchers) == 0:
             self.vLayoutList.addWidget(self.emptyLabel)
 
+        self.load_config()
+
         self.update_watcher_list()
+        # To display disabled watchers
+        self.build_watchers_list()
 
     def read_general_settings(self):
         try:
@@ -115,10 +119,7 @@ class MainWin(QMainWindow):
         """
         Update watchers list in different threads
         """
-        if len(self.update_threads_pool) == 0:
-            # self.build_watchers_list()
-            pass
-        else:
+        if len(self.update_threads_pool) > 0:
             self.logger.info('Threads still working, wait ...')
             return
         for w in self.WM.watchers:
@@ -155,8 +156,8 @@ class MainWin(QMainWindow):
     def save_config(self):
         for w in self.WM.watchers:
             self.settings.write_watcher(w)
-        self.settings.write(MAIN_WINDOW_X, str(self.pos().x() if self.pos().x() >= 0 else 0))
-        self.settings.write(MAIN_WINDOW_Y, str(self.pos().y() if self.pos().y() >= 30 else 30))
+        self.settings.write(MAIN_WINDOW_X, str(self.geometry().x()))
+        self.settings.write(MAIN_WINDOW_Y, str(self.geometry().y()))
         self.settings.write(MAIN_WINDOW_HEIGHT, str(self.height()))
         self.settings.write(MAIN_WINDOW_WIDTH, str(self.width()))
         self.settings.write_settings()
@@ -261,6 +262,3 @@ class PlayAudioThread(QThread):
 
 if __name__ == "__main__":
     pass
-
-
-
