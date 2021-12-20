@@ -73,13 +73,16 @@ class WatchManager:
                 f"Время доступа: ~ {w.device.online_stat if bool(w.device.online_stat) else '?'} ms"
         w.update_info(title, online_statistics)
         w.update_online_status(w.device.online_stat)
-        if (w.triggered ^ (w.device.trigger_count > int(Settings().read(CHECK_COUNT_TO_ALARM)))):
+
+        # Write in journal watcher changed status
+        dev_triggered = (w.device.trigger_count > int(Settings().read(CHECK_COUNT_TO_ALARM)))
+        if w.triggered ^ dev_triggered:
             w.triggered = not w.triggered
-            self.logger.info('Watcher status changed, write to journal...')
-            self.journal.add_record(
-                datetime.utcnow().timestamp(), str(w.device), 'Онлайн' if bool(w.device.online_stat) else 'Оффлайн',
-                'Наблюдатель изменил свое состояние'
-            )
+            self.logger.info('Watcher online status changed, write to journal...')
+            event_timestamp = datetime.utcnow().timestamp()
+            online_status = 'Онлайн' if bool(w.device.online_stat) else 'Оффлайн'
+            msg = 'Устройство появилось онлайн' if bool(w.device.online_stat) else 'Устроство ушло в оффлайн'
+            self.journal.add_record(event_timestamp, str(w.device), online_status, msg)
         self.logger.debug(f"{w.device} online_stat (ms): {w.device.online_stat}")
 
     @staticmethod

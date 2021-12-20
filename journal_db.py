@@ -3,11 +3,12 @@
 import logging
 import sqlite3
 from logging import Logger
+from observer import Observer, Observable
 
 DB_VERSION = 1
 
 
-class JournalDb:
+class JournalDb(Observable):
 
     # Singleton
     def __new__(cls, *args):
@@ -21,6 +22,7 @@ class JournalDb:
         self.logger = logging.getLogger('Journal-DB')
         self.db_path = './res/journal.db'
         self.logger.info('Open journal db...')
+        self.observers = []
         try:
             self.db = sqlite3.connect(self.db_path)
             self.upgrade_db()
@@ -87,9 +89,9 @@ class JournalDb:
         rows = [[]]
         try:
             if limit == 0:
-                sql = 'SELECT * FROM journal;'
+                sql = 'SELECT * FROM journal ORDER BY id DESC;'
             else:
-                sql = f'SELECT * FROM journal LIMIT {limit} OFFSET {offset};'
+                sql = f'SELECT * FROM journal ORDER BY id DESC LIMIT {limit} OFFSET {offset} ;'
             cursor.execute(sql)
             rows = cursor.fetchall()
         except sqlite3.Error as e:
@@ -112,7 +114,27 @@ class JournalDb:
             self.logger.error(e)
         else:
             self.db.commit()
+            self.notify_observers()
         cursor.close()
+
+    def attach(self, observer: Observer):
+        """
+        Add journal changes listener
+        """
+        self.observers.append(observer)
+
+    def detach(self, observable: Observable):
+        """
+        Remove journal changes listener
+        """
+        self.observers.remove(observable)
+
+    def notify_observers(self):
+        """
+        Notify observers about journal changes
+        """
+        for observer in self.observers:
+            observer.changed()
 
     def __del__(self):
         if self.db is not None:

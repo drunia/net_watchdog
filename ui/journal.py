@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import logging
-
 from datetime import datetime
 from pytz import timezone
-from PyQt5.Qt import QDialog, QTableWidgetItem, QTableWidget, QScrollArea, QFont
+from PyQt5.Qt import QDialog, QTableWidgetItem, QTableWidget, QFont
 from PyQt5 import uic, QtCore
 from journal_db import JournalDb
+from observer import Observer, Observable
 
 
 PAGE_LIMIT = 100
@@ -16,7 +16,7 @@ TZ = 'Europe/Kiev'
 tz = timezone(TZ)
 
 
-class Journal(QDialog):
+class Journal(QDialog, Observer):
     def __init__(self, parent):
         super().__init__(parent)
         self.logger = logging.getLogger('Journal-UI')
@@ -24,6 +24,7 @@ class Journal(QDialog):
 
         # Connect to journal db
         self.journal = JournalDb()
+        self.journal.attach(self)
 
         # Add hide/restore window option
         self.setModal(True)
@@ -66,9 +67,15 @@ class Journal(QDialog):
                 self.tbl.setItem(row_index+row_offset, col_index, tbl_item)
         self.tbl.resizeColumnsToContents()
 
+    def changed(self):
+        """
+        Journal change Listener
+        """
+        print('Journal changed')
+
+    def __del__(self):
+        self.journal.detach(self)
+
 
 if __name__ == "__main__":
     pass
-
-
-
