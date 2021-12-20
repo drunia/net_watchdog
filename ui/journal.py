@@ -7,7 +7,7 @@ from pytz import timezone
 from PyQt5.Qt import QDialog, QTableWidgetItem, QTableWidget, QFont
 from PyQt5 import uic, QtCore
 from journal_db import JournalDb
-from observer import Observer, Observable
+from observer import Observer
 
 
 PAGE_LIMIT = 100
@@ -71,7 +71,9 @@ class Journal(QDialog, Observer):
         """
         Journal change Listener
         """
-        print('Journal changed')
+        self.logger.info('Update records in table...')
+        self.tbl.setRowCount(0)
+        self.add_table_records()
 
     def __del__(self):
         self.journal.detach(self)

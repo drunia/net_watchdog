@@ -117,13 +117,13 @@ class JournalDb(Observable):
             self.notify_observers()
         cursor.close()
 
-    def attach(self, observer: Observer):
+    def attach(self, observer):
         """
         Add journal changes listener
         """
         self.observers.append(observer)
 
-    def detach(self, observable: Observable):
+    def detach(self, observable):
         """
         Remove journal changes listener
         """
