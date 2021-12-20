@@ -20,10 +20,11 @@ class WatchFrame(QFrame):
     def __init__(self, device, w_manager):
         super().__init__()
         self.enabled = False
+        self.triggered = False
         self.device = device
         self.WM = w_manager
         self.logger = logging.getLogger("WatchFrame")
-        self.blinked = True
+        self.blinked = False
         # UI
         self.base_stylesheet = """
             QFrame {

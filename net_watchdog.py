@@ -5,11 +5,14 @@ import os
 import sys
 import argparse
 import logging
+import locale
 
 APP_NAME = "NetWatcher"
 APP_VER = "1.0.0"
 
 if __name__ == "__main__":
+    locale.setlocale(locale.LC_ALL, 'ru')
+
     parser = argparse.ArgumentParser(description=f"{APP_NAME} {APP_VER}")
     parser.add_argument("--loglevel", "-l", default="INFO", help="Set the log level (DEBUG, INFO, WARNING, ...)")
     args = parser.parse_args()

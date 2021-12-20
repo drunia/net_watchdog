@@ -4,6 +4,9 @@
 
 from enum import Enum
 from settings import *
+from ui.list_item import WatchFrame
+from journal_db import JournalDb
+from datetime import datetime
 
 
 class WatchMethod(Enum):
@@ -32,6 +35,7 @@ class WatchManager:
         self.main_w = main_w
         self.settings = Settings()
         self.logger = logging.getLogger("WatchManager")
+        self.journal = JournalDb()
 
     def add_watch(self, w):
         self.watchers.append(w)
@@ -46,7 +50,7 @@ class WatchManager:
         if self.main_w.vLayoutList.count() == 0:
             self.main_w.vLayoutList.addWidget(self.main_w.emptyLabel)
 
-    def update_info(self, w):
+    def update_info(self, w: WatchFrame):
         title = f"{str(WatchMethod(w.device.watch_method)).partition('.')[2]} {w.device.ip}"
         if w.device.watch_method == WatchMethod.PING:
             method_str = f"Использую старый добрый ping (ECHO, ICMP)"
@@ -69,6 +73,13 @@ class WatchManager:
                 f"Время доступа: ~ {w.device.online_stat if bool(w.device.online_stat) else '?'} ms"
         w.update_info(title, online_statistics)
         w.update_online_status(w.device.online_stat)
+        if (w.triggered ^ (w.device.trigger_count > int(Settings().read(CHECK_COUNT_TO_ALARM)))):
+            w.triggered = not w.triggered
+            self.logger.info('Watcher status changed, write to journal...')
+            self.journal.add_record(
+                datetime.utcnow().timestamp(), str(w.device), 'Онлайн' if bool(w.device.online_stat) else 'Оффлайн',
+                'Наблюдатель изменил свое состояние'
+            )
         self.logger.debug(f"{w.device} online_stat (ms): {w.device.online_stat}")
 
     @staticmethod

@@ -72,14 +72,12 @@
     <property name="mouseTracking">
      <bool>false</bool>
     </property>
-    <property name="tabletTracking">
-     <bool>false</bool>
-    </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
     <property name="text">
-     <string>Добавить наблюдатель</string>
+     <string>Добавить
+наблюдатель</string>
     </property>
     <property name="icon">
      <iconset>
@@ -102,6 +100,9 @@
     </property>
     <property name="toolButtonStyle">
      <enum>Qt::ToolButtonTextUnderIcon</enum>
+    </property>
+    <property name="tabletTracking" stdset="0">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QScrollArea" name="scrollArea">
@@ -127,9 +128,6 @@
     </property>
     <property name="horizontalScrollBarPolicy">
      <enum>Qt::ScrollBarAsNeeded</enum>
-    </property>
-    <property name="sizeAdjustPolicy">
-     <enum>QAbstractScrollArea::AdjustToContents</enum>
     </property>
     <property name="widgetResizable">
      <bool>true</bool>
@@ -183,14 +181,12 @@
     <property name="mouseTracking">
      <bool>false</bool>
     </property>
-    <property name="tabletTracking">
-     <bool>false</bool>
-    </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
     <property name="text">
-     <string>Открыть журнал</string>
+     <string>Открыть
+журнал</string>
     </property>
     <property name="icon">
      <iconset>
@@ -216,6 +212,9 @@
     </property>
     <property name="toolButtonStyle">
      <enum>Qt::ToolButtonTextUnderIcon</enum>
+    </property>
+    <property name="tabletTracking" stdset="0">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QFrame" name="settings_frame">
@@ -251,14 +250,12 @@
      <property name="mouseTracking">
       <bool>false</bool>
      </property>
-     <property name="tabletTracking">
-      <bool>false</bool>
-     </property>
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>
      <property name="text">
-      <string>Открыть настройки</string>
+      <string>Открыть
+настройки</string>
      </property>
      <property name="iconSize">
       <size>
@@ -280,6 +277,9 @@
      </property>
      <property name="toolButtonStyle">
       <enum>Qt::ToolButtonTextUnderIcon</enum>
+     </property>
+     <property name="tabletTracking" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QLabel" name="email_lb">

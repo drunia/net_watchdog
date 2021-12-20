@@ -68,7 +68,8 @@ class JournalDb:
             cursor.execute(sql)
             sql = 'INSERT INTO version VALUES ("1");'
             cursor.execute(sql)
-            sql = 'CREATE TABLE journal (id INTEGER PRIMARY KEY, timestamp INTEGER, event TEXT, msg TEXT);'
+            sql = 'CREATE TABLE journal (id INTEGER PRIMARY KEY, ' \
+                  'timestamp INTEGER, watcher TEXT, event TEXT, msg TEXT);'
             cursor.execute(sql)
             self.db.commit()
         except sqlite3.Error as e:
@@ -98,13 +99,14 @@ class JournalDb:
         cursor.close()
         return rows
 
-    def add_record(self, timestamp, event, msg):
+    def add_record(self, timestamp, watcher, event, msg):
         """
         Add new row to db
         """
         cursor = self.db.cursor()
         try:
-            sql = f'INSERT INTO journal (timestamp, event, msg) VALUES ("{timestamp}", "{event}", "{msg}");'
+            sql = f"INSERT INTO journal (timestamp, watcher, event, msg)" \
+                f" VALUES ('{timestamp}', '{str(watcher)}', '{event}', '{msg}');"
             cursor.execute(sql)
         except sqlite3.Error as e:
             self.logger.error(e)
@@ -119,15 +121,13 @@ class JournalDb:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format="%(filename)s:%(lineno)d: %(levelname)s %(asctime)s (%(name)s): %(message)s",
-                        level=1, datefmt="%d-%b-%Y %H:%M:%S")
+    from datetime import datetime
     journal = JournalDb()
-    for i in [1, 2, 3]:
-        journal.add_record(i, "12", "smwdj")
-    tbl = journal.read_all()
-    for row in tbl:
-        print(row)
+    for i in range(200):
+        journal.add_record(datetime.utcnow().timestamp(), "PING@127.0.0.1", 'Онлайн', 'Утсройство появилось в сети')
     pass
+
+
 
 
 
