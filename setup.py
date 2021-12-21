@@ -29,11 +29,13 @@ setup(
     options={
         'build_exe': {
             'includes': ['ui'],
-            'excludes': ['settings.ini'],
-            'include_files': ['ui', 'res',
+            'include_files': ['ui',
+                              ('res/icons', 'res/icons'),
+                              ('res/alarm.wav', 'res/alarm.wav'),
                               ('venv/Lib/site-packages/wsdl', 'lib/wsdl'),
                               ('venv/Lib/site-packages/platformdirs', 'lib/platformdirs')],
-            'bin_excludes': ['res/journal.db']
+            'excludes': ['settings.ini'],
+            'optimize': 2
         },
     }
 )
