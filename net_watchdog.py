@@ -18,8 +18,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     numeric_level = getattr(logging, args.loglevel.upper(), None)
+    file_handler = logging.FileHandler('NetWatchdog.log', mode='w')
+    stdout_handler = logging.StreamHandler()
     logging.basicConfig(format="%(filename)s:%(lineno)d: %(levelname)s %(asctime)s (%(name)s): %(message)s",
-                        level=numeric_level, datefmt="%d-%b-%Y %H:%M:%S")
+                        level=numeric_level, datefmt="%d-%b-%Y %H:%M:%S", handlers=[stdout_handler, file_handler])
 
     logger = logging.getLogger(__name__)
     logger.info(f"Start {APP_NAME} {APP_VER}")
