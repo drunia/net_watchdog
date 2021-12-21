@@ -103,7 +103,7 @@ class WatchFrame(QFrame):
             return
         self.WM.del_watch(self)
         self.close()
-        self.logger.info(f"Watcher {self.device} removed.")
+        self.logger.debug(f"Watcher {self.device} removed.")
 
     def update_cam_preview(self, url, auth_data):
         """
@@ -125,7 +125,7 @@ class WatchFrame(QFrame):
             with open(pic, "wb") as f:
                 shutil.copyfileobj(res.raw, f)
             pic_size = os.stat(pic).st_size
-            self.logger.info(f"Watcher [{self.device_title_lb.text()}] " +
+            self.logger.debug(f"Watcher [{self.device_title_lb.text()}] " +
                              f"update_cam_preview(): Snapshot downloaded OK, size: {pic_size//1024} Kb")
         else:
             if os.path.exists(pic):

@@ -1,6 +1,6 @@
 .idea/
 /res/journal.db
 __pycache__/*
-**/__pycache__/*
+*/__pycache__/*
 settings.ini
 /venv/

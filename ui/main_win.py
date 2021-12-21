@@ -95,7 +95,7 @@ class MainWin(QMainWindow):
         except NoOptionError or ValueError:
             self.notify_sound = True
             
-        self.logger.info("General settings readed")
+        self.logger.debug("General settings readed")
 
     def showEvent(self, evt: QShowEvent):
         """Set geometry on showEvent"""
@@ -120,7 +120,7 @@ class MainWin(QMainWindow):
         Update watchers list in different threads
         """
         if len(self.update_threads_pool) > 0:
-            self.logger.info('Threads still working, wait ...')
+            self.logger.debug('Threads still working, wait ...')
             return
         for w in self.WM.watchers:
             if w.enabled:
@@ -136,7 +136,7 @@ class MainWin(QMainWindow):
         for thread in self.update_threads_pool:
             if thread.isFinished():
                 self.update_threads_pool.remove(thread)
-                self.logger.info(f'Thread {thread.objectName()} finished and removed')
+                self.logger.debug(f'Thread {thread.objectName()} finished and removed')
         if len(self.update_threads_pool) == 0:
             self.build_watchers_list()
 
@@ -144,7 +144,7 @@ class MainWin(QMainWindow):
         AddDevDialog(self.add_dev, parent=self).show()
 
     def add_dev(self, dev):
-        self.logger.info(f"Add watcher: {dev}")
+        self.logger.debug(f"Add watcher: {dev}")
         # Remove emptyLabel from watchers list
         if self.vLayoutList.count() == 1 and type(self.vLayoutList.itemAt(0).widget()) is QLabel:
             self.vLayoutList.removeWidget(self.vLayoutList.itemAt(0).widget())
@@ -190,7 +190,7 @@ class MainWin(QMainWindow):
         alarm = False
         for w in self.WM.watchers:
             if w.device.trigger_count >= triggers:
-                self.logger.info(f"{w.device_title_lb.text()} - TRIGGER ALARM ({w.device.trigger_count})")
+                self.logger.debug(f"{w.device_title_lb.text()} - TRIGGER ALARM ({w.device.trigger_count})")
                 alarm = True
         # Play alarm
         if alarm and self.notify_sound:
@@ -232,7 +232,7 @@ class UpdateDevicesThread(QThread):
         if self.w.enabled:
             self.w.loading_lb.setVisible(True)
             online_stat = self.w.device.is_online()
-            self.logger.info(f"online_stat (ms): {online_stat}")
+            self.logger.debug(f"online_stat (ms): {online_stat}")
             self.w.loading_lb.setVisible(False)
         else:
             self.w.device.trigger_count = 0

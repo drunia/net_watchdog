@@ -17,10 +17,15 @@ if __name__ == "__main__":
     parser.add_argument("--loglevel", "-l", default="INFO", help="Set the log level (DEBUG, INFO, WARNING, ...)")
     args = parser.parse_args()
 
-    numeric_level = getattr(logging, args.loglevel.upper(), None)
     file_handler = logging.FileHandler('NetWatchdog.log', mode='w')
     stdout_handler = logging.StreamHandler()
-    logging.basicConfig(format="%(filename)s:%(lineno)d: %(levelname)s %(asctime)s (%(name)s): %(message)s",
+    handlers = [stdout_handler]
+
+    if args.loglevel.upper() == 'DEBUG':
+        handlers.append(file_handler)
+
+    numeric_level = getattr(logging, args.loglevel.upper(), None)
+    logging.basicConfig(format="%(asctime)s %(filename)s:%(lineno)d: %(levelname)s (%(name)s): %(message)s",
                         level=numeric_level, datefmt="%d-%b-%Y %H:%M:%S", handlers=[stdout_handler, file_handler])
 
     logger = logging.getLogger(__name__)
@@ -42,6 +47,6 @@ if __name__ == "__main__":
         for file in os.listdir(tmp_dir):
             del_file = os.path.join(tmp_dir, file)
             if os.access(del_file, os.W_OK):
-                logger.info(f"Delete temp file: {del_file}")
+                logger.debug(f"Delete temp file: {del_file}")
                 os.remove(del_file)
     sys.exit(app_ret_code)

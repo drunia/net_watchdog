@@ -81,7 +81,7 @@ class WatchManager:
             self.logger.info('Watcher online status changed, write to journal...')
             event_timestamp = datetime.utcnow().timestamp()
             online_status = 'Онлайн' if bool(w.device.online_stat) else 'Оффлайн'
-            msg = 'Устройство появилось онлайн' if bool(w.device.online_stat) else 'Устроство ушло в оффлайн'
+            msg = 'Устройство появилось онлайн' if bool(w.device.online_stat) else 'Устройство ушло в оффлайн'
             self.journal.add_record(event_timestamp, str(w.device), online_status, msg)
         self.logger.debug(f"{w.device} online_stat (ms): {w.device.online_stat}")
 

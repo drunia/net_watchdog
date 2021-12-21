@@ -21,7 +21,7 @@ class JournalDb(Observable):
             return
         self.logger = logging.getLogger('Journal-DB')
         self.db_path = './res/journal.db'
-        self.logger.info('Open journal db...')
+        self.logger.debug('Open journal db...')
         self.observers = []
         try:
             self.db = sqlite3.connect(self.db_path)
@@ -33,18 +33,18 @@ class JournalDb(Observable):
         """
         Provides upgrade database when schema has changed
         """
-        self.logger.info(f'Upgrade db to version {version} ...')
+        self.logger.debug(f'Upgrade db to version {version} ...')
         db_ver = self._get_db_ver()
         if db_ver < version:
             if db_ver == 0:
                 # Create new db
-                self.logger.info('Create new db...')
+                self.logger.debug('Create new db...')
                 self._create_db()
             # if db_ver == 1:
                 # [ code ] to update to ver 2
                 # ...
         else:
-            self.logger.info(f'Update not needed, exiting...')
+            self.logger.debug(f'Update not needed, exiting...')
 
     def _get_db_ver(self):
         ver = 0
@@ -56,7 +56,7 @@ class JournalDb(Observable):
         except sqlite3.Error as e:
             self.logger.error(e)
         else:
-            self.logger.info(f'Journal db version: {ver}')
+            self.logger.debug(f'Journal db version: {ver}')
         cursor.close()
         return ver
 
@@ -77,7 +77,7 @@ class JournalDb(Observable):
         except sqlite3.Error as e:
             self.logger.error(e)
         else:
-            self.logger.info('Database created!')
+            self.logger.debug('Database created!')
         cursor.close()
 
     def read_all(self, limit=0, offset=0):
@@ -138,7 +138,7 @@ class JournalDb(Observable):
 
     def __del__(self):
         if self.db is not None:
-            self.logger.info('Closing db.')
+            self.logger.debug('Closing db.')
             self.db.close()
 
 

@@ -54,7 +54,7 @@ class Journal(QDialog, Observer):
         row_offset = self.tbl.rowCount()
         data = self.journal.read_all(PAGE_LIMIT, row_offset)
         if len(data) <= 0:
-            self.logger.info('No data to view!')
+            self.logger.debug('No data to view!')
             return
         self.tbl.setRowCount(row_offset + len(data))
         for row_index in range(len(data)):
@@ -71,7 +71,7 @@ class Journal(QDialog, Observer):
         """
         Journal change Listener
         """
-        self.logger.info('Update records in table...')
+        self.logger.debug('Update records in table...')
         self.tbl.setRowCount(0)
         self.add_table_records()
 

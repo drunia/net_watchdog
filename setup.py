@@ -13,7 +13,8 @@ if sys.platform == "win32":
     base = "Win32GUI"
 
 execs = [
-    Executable("net_watchdog.py", base=base)
+    Executable("net_watchdog.py", base=base),
+    Executable("net_watchdog.py", base='Console', targetName='net_watchdog_debug.exe'),
 ]
 
 PYTHON_INSTALL_DIR = os.path.dirname(os.path.dirname(os.__file__))
@@ -29,7 +30,9 @@ setup(
         'build_exe': {
             'includes': ['ui'],
             'excludes': ['settings.ini'],
-            'include_files': ['ui', 'res'],
+            'include_files': ['ui', 'res',
+                              ('venv/Lib/site-packages/wsdl', 'lib/wsdl'),
+                              ('venv/Lib/site-packages/platformdirs', 'lib/platformdirs')],
             'bin_excludes': ['res/journal.db']
         },
     }

@@ -72,7 +72,7 @@ class AddDevDialog(QDialog):
         user: str = self.login_edit.text()
         pwd: str = self.pass_edit.text()
 
-        self.logger.info(f"add fields: {ip}, {port}, {user}, {pwd}")
+        self.logger.debug(f"add fields: {ip}, {port}, {user}, {pwd}")
 
         success = (
             bool(re.match(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", ip)) and
