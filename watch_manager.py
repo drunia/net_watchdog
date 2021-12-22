@@ -76,7 +76,7 @@ class WatchManager:
 
         # Write in journal watcher changed status
         dev_triggered = (w.device.trigger_count > int(Settings().read(CHECK_COUNT_TO_ALARM)))
-        if w.triggered ^ dev_triggered:
+        if (w.triggered ^ dev_triggered) and w.enabled:
             w.triggered = not w.triggered
             self.logger.info('Watcher online status changed, write to journal...')
             event_timestamp = datetime.utcnow().timestamp()

@@ -146,5 +146,6 @@ class Device:
         return f"{self.watch_method}@{self.ip}"
 
 
+
 if __name__ == "__main__":
     pass

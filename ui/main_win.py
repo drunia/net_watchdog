@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5.QtCore import QThread, Qt, QTimer, QRect, QSize
-from PyQt5.QtWidgets import QMainWindow, QLabel
+from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox
 from PyQt5 import uic
 from PyQt5.QtGui import QFont, QIcon, QResizeEvent, QShowEvent
 
@@ -145,6 +145,12 @@ class MainWin(QMainWindow):
 
     def add_dev(self, dev):
         self.logger.debug(f"Add watcher: {dev}")
+        # Check if watcher already exists
+        for w in self.WM.watchers:
+            if str(w.device) == str(dev):
+                QMessageBox.warning(self, 'Добавить наблюдатель',
+                                    'Такой наблюдатель уже в списке!')
+                return
         # Remove emptyLabel from watchers list
         if self.vLayoutList.count() == 1 and type(self.vLayoutList.itemAt(0).widget()) is QLabel:
             self.vLayoutList.removeWidget(self.vLayoutList.itemAt(0).widget())
@@ -205,7 +211,10 @@ class MainWin(QMainWindow):
 
     # Save settings on close main window
     def closeEvent(self, evt):
-        self.save_config()
+        try:
+            self.save_config()
+        except Exception as e:
+            print(e.with_traceback())
         evt.accept()
 
     def resizeEvent(self, evt: QResizeEvent):

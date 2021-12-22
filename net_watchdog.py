@@ -3,12 +3,19 @@
 
 import os
 import sys
+import traceback
 import argparse
 import logging
 import locale
 
 APP_NAME = "NetWatcher"
 APP_VER = "1.0.0"
+
+
+def excepthook(exc_type, exc_value, exc_tb):
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    print("error message:\n", tb)
+
 
 if __name__ == "__main__":
     locale.setlocale(locale.LC_ALL, 'ru')
@@ -34,12 +41,13 @@ if __name__ == "__main__":
     from ui import main_win
     from PyQt5.QtWidgets import QApplication, QStyleFactory
 
+    sys.excepthook = excepthook
     app = QApplication(sys.argv)
     if "Fusion" in QStyleFactory.keys():
         app.setStyle("Fusion")
     main_w = main_win.MainWin()
     main_w.show()
-    app_ret_code = app.exec()
+    app_ret_code = app.exec_()
 
     # Clear tmp dir
     tmp_dir = os.path.join(os.curdir, "tmp")

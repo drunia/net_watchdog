@@ -29,7 +29,7 @@ setup(
     options={
         'build_exe': {
             'includes': ['ui'],
-            'include_files': ['ui',
+            'include_files': ['ui', 'readme.txt',
                               ('res/icons', 'res/icons'),
                               ('res/alarm.wav', 'res/alarm.wav'),
                               ('venv/Lib/site-packages/wsdl', 'lib/wsdl'),
