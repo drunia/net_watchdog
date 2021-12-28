@@ -35,7 +35,9 @@ setup(
                               ('venv/Lib/site-packages/wsdl', 'lib/wsdl'),
                               ('venv/Lib/site-packages/platformdirs', 'lib/platformdirs')],
             'excludes': ['settings.ini'],
-            'optimize': 2
+            'optimize': 2,
+            'include_msvcr': True,
+            'add_to_path': True
         },
     }
 )
