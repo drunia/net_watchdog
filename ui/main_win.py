@@ -29,7 +29,6 @@ class MainWin(QMainWindow):
 
         # Settings
         self.settings = Settings()
-        self.WM = WatchManager(self)
 
         self.logger = logging.getLogger("MainWin")
         self.update_threads_pool = []
@@ -63,6 +62,9 @@ class MainWin(QMainWindow):
         self.add_dev_btn.clicked.connect(self.add_dev_btn_click)
         self.open_journal_btn.clicked.connect(self.open_journal)
         self.open_settings_btn.clicked.connect(self.open_settings)
+
+        # Create WatchManager
+        self.WM = WatchManager(self)
 
         # Create update timer
         self.timer = QTimer(self)

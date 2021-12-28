@@ -33,8 +33,8 @@ class WatchManager:
 
     def __init__(self, main_w):
         self.main_w = main_w
-        self.settings = Settings()
         self.logger = logging.getLogger("WatchManager")
+        self.settings = Settings()
         self.journal = JournalDb()
 
     def add_watch(self, w):
