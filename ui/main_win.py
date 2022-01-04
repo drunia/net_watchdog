@@ -149,7 +149,7 @@ class MainWin(QMainWindow):
         self.logger.debug(f"Add watcher: {dev}")
         # Check if watcher already exists
         for w in self.WM.watchers:
-            if str(w.device) == str(dev):
+            if w.device == dev:
                 QMessageBox.warning(self, 'Добавить наблюдатель',
                                     'Такой наблюдатель уже в списке!')
                 return

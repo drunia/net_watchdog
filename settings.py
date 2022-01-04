@@ -91,7 +91,7 @@ class Settings:
             "port": str(watcher.device.port),
             "watched": str(watcher.device.watched)
         }
-        self.config[watcher.device] = watcher_config
+        self.config[str(watcher.device)] = watcher_config
         self.watchers = list(
             filter(lambda item: str(item).startswith("WatchMethod."), self.config.sections())
         )

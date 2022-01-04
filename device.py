@@ -145,6 +145,9 @@ class Device:
     def __str__(self):
         return f"{self.watch_method}@{self.ip}"
 
+    def __eq__(self, other):
+        return isinstance(other, Device) and (self.port == other.port) and (self.watch_method == other.watch_method) \
+               and (self.ip == other.ip) and (self.watch_for == other.watch_for)
 
 
 if __name__ == "__main__":
