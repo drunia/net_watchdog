@@ -58,7 +58,7 @@ class Device:
             try:
                 self.online_stat = self._get_onvif_info()
             except ONVIFError as e:
-                print(e)
+                self.logger.error(e)
         elif self.watch_method == WatchMethod.PORT:
             port_res = self._port_is_open()
             if isinstance(port_res, (int, float)):
@@ -122,8 +122,9 @@ class Device:
             if self.onvif_device is None:
                 self.onvif_device: ONVIFCamera = ONVIFCamera(self.ip, self.port, self.user, self.password)
             return self.onvif_device.devicemgmt.GetDeviceInformation()
-        except ONVIFError:
+        except ONVIFError as e:
             self.onvif_device = None
+            self.logger.error(e)
             return None
 
     def _port_is_open(self):
@@ -143,6 +144,10 @@ class Device:
 
     def __str__(self):
         return f"{self.watch_method}@{self.ip}"
+
+    def __eq__(self, other):
+        return isinstance(other, Device) and (self.port == other.port) and (self.watch_method == other.watch_method) \
+               and (self.ip == other.ip) and (self.watch_for == other.watch_for)
 
 
 if __name__ == "__main__":

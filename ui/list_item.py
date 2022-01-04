@@ -20,10 +20,11 @@ class WatchFrame(QFrame):
     def __init__(self, device, w_manager):
         super().__init__()
         self.enabled = False
+        self.triggered = False
         self.device = device
         self.WM = w_manager
         self.logger = logging.getLogger("WatchFrame")
-        self.blinked = True
+        self.blinked = False
         # UI
         self.base_stylesheet = """
             QFrame {
@@ -83,7 +84,7 @@ class WatchFrame(QFrame):
 
     def timerEvent(self):
         font: QFont = self.device_status_lb.font()
-        if self.device.trigger_count >= int(settings.Settings().read(settings.CHECK_COUNT_TO_ALARM)):
+        if self.device.trigger_count >= int(self.WM.settings.read(settings.CHECK_COUNT_TO_ALARM)):
             self.blinked = not self.blinked
             font.setBold(self.blinked)
         else:
@@ -102,10 +103,10 @@ class WatchFrame(QFrame):
             return
         self.WM.del_watch(self)
         self.close()
-        self.logger.info(f"Watcher {self.device} removed.")
+        self.logger.debug(f"Watcher {self.device} removed.")
 
     def update_cam_preview(self, url, auth_data):
-        """"
+        """
             :param url - HTTP URL
             :param auth_data - list [user, password]
             :return QPixmap
@@ -124,7 +125,7 @@ class WatchFrame(QFrame):
             with open(pic, "wb") as f:
                 shutil.copyfileobj(res.raw, f)
             pic_size = os.stat(pic).st_size
-            self.logger.info(f"Watcher [{self.device_title_lb.text()}] " +
+            self.logger.debug(f"Watcher [{self.device_title_lb.text()}] " +
                              f"update_cam_preview(): Snapshot downloaded OK, size: {pic_size//1024} Kb")
         else:
             if os.path.exists(pic):

@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5.QtCore import QThread, Qt, QTimer, QRect, QSize
-from PyQt5.QtWidgets import QMainWindow, QLabel
+from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox
 from PyQt5 import uic
 from PyQt5.QtGui import QFont, QIcon, QResizeEvent, QShowEvent
+
+from settings import *
 from watch_manager import *
 from ui.list_item import WatchFrame
 from device import Device
@@ -27,7 +29,6 @@ class MainWin(QMainWindow):
 
         # Settings
         self.settings = Settings()
-        self.WM = WatchManager(self)
 
         self.logger = logging.getLogger("MainWin")
         self.update_threads_pool = []
@@ -62,6 +63,9 @@ class MainWin(QMainWindow):
         self.open_journal_btn.clicked.connect(self.open_journal)
         self.open_settings_btn.clicked.connect(self.open_settings)
 
+        # Create WatchManager
+        self.WM = WatchManager(self)
+
         # Create update timer
         self.timer = QTimer(self)
         # Set default interval
@@ -69,12 +73,14 @@ class MainWin(QMainWindow):
         self.timer.timeout.connect(self.update_watcher_list)
         self.timer.start()
 
-        if len(self.settings.watchers) > 0:
-            self.load_config()
-        else:
+        if len(self.settings.watchers) == 0:
             self.vLayoutList.addWidget(self.emptyLabel)
 
+        self.load_config()
+
         self.update_watcher_list()
+        # To display disabled watchers
+        self.build_watchers_list()
 
     def read_general_settings(self):
         try:
@@ -91,7 +97,7 @@ class MainWin(QMainWindow):
         except NoOptionError or ValueError:
             self.notify_sound = True
             
-        self.logger.info("General settings readed")
+        self.logger.debug("General settings readed")
 
     def showEvent(self, evt: QShowEvent):
         """Set geometry on showEvent"""
@@ -115,11 +121,8 @@ class MainWin(QMainWindow):
         """
         Update watchers list in different threads
         """
-        if len(self.update_threads_pool) == 0:
-            # self.build_watchers_list()
-            pass
-        else:
-            self.logger.info('Threads still working, wait ...')
+        if len(self.update_threads_pool) > 0:
+            self.logger.debug('Threads still working, wait ...')
             return
         for w in self.WM.watchers:
             if w.enabled:
@@ -135,7 +138,7 @@ class MainWin(QMainWindow):
         for thread in self.update_threads_pool:
             if thread.isFinished():
                 self.update_threads_pool.remove(thread)
-                self.logger.info(f'Thread {thread.objectName()} finished and removed')
+                self.logger.debug(f'Thread {thread.objectName()} finished and removed')
         if len(self.update_threads_pool) == 0:
             self.build_watchers_list()
 
@@ -143,7 +146,13 @@ class MainWin(QMainWindow):
         AddDevDialog(self.add_dev, parent=self).show()
 
     def add_dev(self, dev):
-        self.logger.info(f"Add watcher: {dev}")
+        self.logger.debug(f"Add watcher: {dev}")
+        # Check if watcher already exists
+        for w in self.WM.watchers:
+            if w.device == dev:
+                QMessageBox.warning(self, 'Добавить наблюдатель',
+                                    'Такой наблюдатель уже в списке!')
+                return
         # Remove emptyLabel from watchers list
         if self.vLayoutList.count() == 1 and type(self.vLayoutList.itemAt(0).widget()) is QLabel:
             self.vLayoutList.removeWidget(self.vLayoutList.itemAt(0).widget())
@@ -155,8 +164,8 @@ class MainWin(QMainWindow):
     def save_config(self):
         for w in self.WM.watchers:
             self.settings.write_watcher(w)
-        self.settings.write(MAIN_WINDOW_X, str(self.pos().x() if self.pos().x() >= 0 else 0))
-        self.settings.write(MAIN_WINDOW_Y, str(self.pos().y() if self.pos().y() >= 30 else 30))
+        self.settings.write(MAIN_WINDOW_X, str(self.geometry().x()))
+        self.settings.write(MAIN_WINDOW_Y, str(self.geometry().y()))
         self.settings.write(MAIN_WINDOW_HEIGHT, str(self.height()))
         self.settings.write(MAIN_WINDOW_WIDTH, str(self.width()))
         self.settings.write_settings()
@@ -189,7 +198,7 @@ class MainWin(QMainWindow):
         alarm = False
         for w in self.WM.watchers:
             if w.device.trigger_count >= triggers:
-                self.logger.info(f"{w.device_title_lb.text()} - TRIGGER ALARM ({w.device.trigger_count})")
+                self.logger.debug(f"{w.device_title_lb.text()} - TRIGGER ALARM ({w.device.trigger_count})")
                 alarm = True
         # Play alarm
         if alarm and self.notify_sound:
@@ -204,7 +213,10 @@ class MainWin(QMainWindow):
 
     # Save settings on close main window
     def closeEvent(self, evt):
-        self.save_config()
+        try:
+            self.save_config()
+        except Exception as e:
+            print(e.with_traceback())
         evt.accept()
 
     def resizeEvent(self, evt: QResizeEvent):
@@ -231,7 +243,7 @@ class UpdateDevicesThread(QThread):
         if self.w.enabled:
             self.w.loading_lb.setVisible(True)
             online_stat = self.w.device.is_online()
-            self.logger.info(f"online_stat (ms): {online_stat}")
+            self.logger.debug(f"online_stat (ms): {online_stat}")
             self.w.loading_lb.setVisible(False)
         else:
             self.w.device.trigger_count = 0
@@ -261,6 +273,3 @@ class PlayAudioThread(QThread):
 
 if __name__ == "__main__":
     pass
-
-
-

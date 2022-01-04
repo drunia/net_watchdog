@@ -1,5 +1,11 @@
 .idea/
+<<<<<<< HEAD
 __pycache__/*
 **/__pycache__/*
+=======
+/res/journal.db
+__pycache__/*
+*/__pycache__/*
+>>>>>>> dev
 settings.ini
 /venv/
