@@ -5,6 +5,7 @@ from PyQt5.QtCore import QThread, Qt, QTimer, QRect, QSize
 from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox
 from PyQt5 import uic
 from PyQt5.QtGui import QFont, QIcon, QResizeEvent, QShowEvent
+from PyQt5.uic.properties import QtGui
 
 from settings import *
 from watch_manager import *
@@ -213,6 +214,14 @@ class MainWin(QMainWindow):
 
     # Save settings on close main window
     def closeEvent(self, evt):
+        try:
+            self.save_config()
+        except Exception as e:
+            print(e.with_traceback())
+        evt.accept()
+
+    # Save settings on hide main window
+    def hideEvent(self, evt):
         try:
             self.save_config()
         except Exception as e:

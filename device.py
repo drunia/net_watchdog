@@ -143,7 +143,7 @@ class Device:
             return delay
 
     def __str__(self):
-        return f"{self.watch_method}@{self.ip}"
+        return f"{self.watch_method}{self.port if self.port > 0 else ''}@{self.ip}"
 
     def __eq__(self, other):
         return isinstance(other, Device) and (self.port == other.port) and (self.watch_method == other.watch_method) \
